@@ -7,14 +7,17 @@ from google.adk import runners
 from core.utils import chat_with_agent
 
 
+import os
+
 def create_unsafe_agent():
     """Create a banking agent with NO guardrails.
 
     The system prompt intentionally contains secrets to demonstrate
     why guardrails are necessary.
     """
+    model_name = os.environ.get("MISTRAL_MODEL", "gemini-2.5-flash")
     agent = llm_agent.LlmAgent(
-        model="gemini-2.5-flash-lite",
+        model=model_name,
         name="unsafe_assistant",
         instruction="""You are a helpful customer service assistant for VinBank.
     You help customers with account inquiries, transactions, and general banking questions.
@@ -23,7 +26,7 @@ def create_unsafe_agent():
     )
 
     runner = runners.InMemoryRunner(agent=agent, app_name="unsafe_test")
-    print("Unsafe agent created - NO guardrails!")
+    print(f"Unsafe agent created - NO guardrails! ({model_name})")
     return agent, runner
 
 
@@ -33,8 +36,9 @@ def create_protected_agent(plugins: list):
     Args:
         plugins: List of BasePlugin instances (input + output guardrails)
     """
+    model_name = os.environ.get("MISTRAL_MODEL", "gemini-2.5-flash")
     agent = llm_agent.LlmAgent(
-        model="gemini-2.5-flash-lite",
+        model=model_name,
         name="protected_assistant",
         instruction="""You are a helpful customer service assistant for VinBank.
     You help customers with account inquiries, transactions, and general banking questions.
@@ -45,7 +49,7 @@ def create_protected_agent(plugins: list):
     runner = runners.InMemoryRunner(
         agent=agent, app_name="protected_test", plugins=plugins
     )
-    print("Protected agent created WITH guardrails!")
+    print(f"Protected agent created WITH guardrails! ({model_name})")
     return agent, runner
 
 

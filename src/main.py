@@ -13,6 +13,14 @@ import sys
 import asyncio
 import argparse
 
+# Reconfigure console streams to use UTF-8 to prevent emoji/Vietnamese encoding errors on Windows
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 from core.config import setup_api_key
 
 

@@ -5,11 +5,33 @@ import os
 
 
 def setup_api_key():
-    """Load Google API key from environment or prompt."""
-    if "GOOGLE_API_KEY" not in os.environ:
+    """Load Google API key, Mistral configuration from environment, .env file, or prompt."""
+    # Load all env vars from .env if it exists
+    for path in [".env", "../.env", "../../.env"]:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k not in os.environ:
+                            os.environ[k] = v
+            break
+
+    if "GOOGLE_API_KEY" not in os.environ or not os.environ["GOOGLE_API_KEY"]:
         os.environ["GOOGLE_API_KEY"] = input("Enter Google API Key: ")
     os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "0"
-    print("API key loaded.")
+    print("API keys and environment loaded.")
+
+    # Import MistralLlm to trigger its registration in the ADK registry
+    try:
+        import core.mistral_model
+    except ImportError:
+        pass
 
 
 # Allowed banking topics (used by topic_filter)
